@@ -38,7 +38,7 @@
             android:id="@+id/button_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:foreground="?selectableItemBackground"
+            android:background="?selectableItemBackground"
             android:padding="16dp"
             android:layout_gravity="start"
             android:text="@string/button_back"
@@ -60,7 +60,7 @@
                 android:orientation="horizontal"
                 android:layout_gravity="center"
                 android:layout_width="wrap_content"
-                android:foreground="?selectableItemBackground"
+                android:background="?selectableItemBackground"
                 android:layout_height="wrap_content"
                 tools:showIn="@layout/activity_matisse">
 
@@ -105,7 +105,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:foreground="?selectableItemBackground"
+            android:background="?selectableItemBackground"
             android:padding="16dp"
             android:textColor="?attr/preview.bottomToolbar.apply.textColor"
             android:textSize="16sp"/>
