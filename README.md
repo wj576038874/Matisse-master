@@ -3,7 +3,7 @@
 [Matisse is an Open Source Project](https://github.com/zhihu/Matisse)
 
 ##效果图
-[Matisse is an Open Source Project](https://github.com/wj576038874/Matisse-master/blob/master/image/666.gif)
+[效果图](https://github.com/wj576038874/Matisse-master/blob/master/image/666.gif)
 
 
 ## Thanks
