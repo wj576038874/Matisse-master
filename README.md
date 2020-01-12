@@ -1,9 +1,10 @@
 
-#### More
-Find more details about Matisse in [wiki](https://github.com/zhihu/Matisse/wiki).
+## 开原地址
+[Matisse is an Open Source Project](https://github.com/zhihu/Matisse)
 
-## Contributing
-[Matisse is an Open Source Project](https://github.com/zhihu/Matisse/blob/master/CONTRIBUTING.md)
+##效果图
+[Matisse is an Open Source Project](https://github.com/wj576038874/Matisse-master/blob/master/image/666.gif)
+
 
 ## Thanks
 This library is inspired by [Laevatein](https://github.com/nohana/Laevatein) and uses some of its source code.
