@@ -121,7 +121,7 @@ public class SampleActivity extends AppCompatActivity implements View.OnClickLis
                                 new CaptureStrategy(true, "com.zhihu.matisse.sample.fileprovider", "test"))
                         .theme(R.style.Matisse_Dracula)
                         .countable(true)
-                        .spanCount(4)
+                        .spanCount(3)
                         .thumbnailScale(1.0f)
                         .addFilter(new GifSizeFilter(320, 320, 5 * Filter.K * Filter.K))
                         .maxSelectable(9)

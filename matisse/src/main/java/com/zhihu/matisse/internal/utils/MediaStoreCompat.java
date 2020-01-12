@@ -16,6 +16,8 @@
 package com.zhihu.matisse.internal.utils;
 
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -24,14 +26,19 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.core.content.FileProvider;
 import androidx.core.os.EnvironmentCompat;
 
 import com.zhihu.matisse.internal.entity.CaptureStrategy;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -42,9 +49,9 @@ public class MediaStoreCompat {
 
     private final WeakReference<Activity> mContext;
     private final WeakReference<Fragment> mFragment;
-    private       CaptureStrategy         mCaptureStrategy;
-    private       Uri                     mCurrentPhotoUri;
-    private       String                  mCurrentPhotoPath;
+    private CaptureStrategy mCaptureStrategy;
+    private Uri mCurrentPhotoUri;
+    private String mCurrentPhotoPath;
 
     public MediaStoreCompat(Activity activity) {
         mContext = new WeakReference<>(activity);
@@ -83,10 +90,16 @@ public class MediaStoreCompat {
 
             if (photoFile != null) {
                 mCurrentPhotoPath = photoFile.getAbsolutePath();
-                mCurrentPhotoUri = FileProvider.getUriForFile(mContext.get(),
-                        mCaptureStrategy.authority, photoFile);
-                captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentPhotoUri);
-                captureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+                if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+                    mCurrentPhotoUri = getUriForFile(context, photoFile);
+                    captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentPhotoUri);
+                } else {
+                    mCurrentPhotoUri = FileProvider.getUriForFile(mContext.get(),
+                            mCaptureStrategy.authority, photoFile);
+                    captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentPhotoUri);
+                    captureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                }
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                     List<ResolveInfo> resInfoList = context.getPackageManager()
                             .queryIntentActivities(captureIntent, PackageManager.MATCH_DEFAULT_ONLY);
@@ -104,6 +117,80 @@ public class MediaStoreCompat {
             }
         }
     }
+
+
+    /**
+     * android10 获取保存拍照图片的URI
+     *
+     * @param context    context
+     * @param sourceFile 拍照的图片
+     * @return uri
+     */
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private Uri getUriForFile(Context context, File sourceFile) {
+
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DESCRIPTION, "This is an image");
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, sourceFile.getName());
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+        values.put(MediaStore.Images.Media.TITLE, "Image.png");
+        values.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/" + "zhihu");
+
+        Uri external = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        ContentResolver resolver = context.getContentResolver();
+
+        return resolver.insert(external, values);
+    }
+
+    public boolean saveImageWithAndroidQ(Context context,
+                                         File sourceFile,
+                                         String saveFileName,
+                                         String saveDirName) {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DESCRIPTION, "This is an image");
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, saveFileName);
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+        values.put(MediaStore.Images.Media.TITLE, "Image.png");
+        values.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/" + saveDirName);
+
+        Uri external = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        ContentResolver resolver = context.getContentResolver();
+
+        Uri insertUri = resolver.insert(external, values);
+        BufferedInputStream inputStream = null;
+        OutputStream os = null;
+        boolean result = false;
+        try {
+            inputStream = new BufferedInputStream(new FileInputStream(sourceFile));
+            if (insertUri != null) {
+                os = resolver.openOutputStream(insertUri);
+            }
+            if (os != null) {
+                byte[] buffer = new byte[1024 * 4];
+                int len;
+                while ((len = inputStream.read(buffer)) != -1) {
+                    os.write(buffer, 0, len);
+                }
+                os.flush();
+            }
+            result = true;
+        } catch (IOException e) {
+            result = false;
+        } finally {
+            try {
+                if (os != null) {
+                    os.close();
+                }
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
+    }
+
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private File createImageFile() throws IOException {
